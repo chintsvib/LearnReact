@@ -1,6 +1,5 @@
-import axios, { CanceledError } from "axios";
 import { useEffect, useState } from "react";
-
+import apiClient, {CanceledError} from "./services/api.client";
 
 interface User {
   id: number;
@@ -16,7 +15,7 @@ function App() {
   useEffect(() => {
     const controller = new AbortController();
     setIsLoading(true);
-    axios.get<User[]>('https://jsonplaceholder.typicode.com/users', {signal: controller.signal})
+    apiClient.get<User[]>('/users', {signal: controller.signal})
       .then(response => setUsers(response.data))
       .catch(error => {
         if (error instanceof CanceledError) return;
@@ -29,7 +28,7 @@ function App() {
   const deleteUser = (user: User) => {
     const originalUsers = [...users];
     setUsers(users.filter(u => u.id !== user.id));
-    axios.delete(`https://jsonplaceholder.typicode.com/xsers/${user.id}`)
+    apiClient.delete(`/users/${user.id}`)
       .catch(error => {
         if (error instanceof CanceledError) return;
         setError(error.message);
@@ -41,7 +40,7 @@ function App() {
     const originalUsers = [...users];
     const newUser = { id: 0, name: 'New User' };
     setUsers([newUser, ...users]);
-    axios.post('https://jsonplaceholder.typicode.com/users', newUser)
+    apiClient.post('/users', newUser)
       .then(response => setUsers([response.data, ...users]))
       .catch(error => {
         if (error instanceof CanceledError) return;
@@ -54,7 +53,7 @@ function App() {
     const originalUsers = [...users];
     const updatedUser = { ...user, name: user.name + ' (updated)' };
     setUsers(users.map(u => u.id === user.id ? updatedUser : u));
-    axios.patch(`https://jsonplaceholder.typicode.com/xsers/${user.id}`, updatedUser)
+    apiClient.patch(`/users/${user.id}`, updatedUser)
       .catch(error => {
         if (error instanceof CanceledError) return;
         setError(error.message);
